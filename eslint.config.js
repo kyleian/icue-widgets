@@ -28,7 +28,8 @@ export default [
     },
   },
   {
-    // Widget scripts — also expose iCUE globals injected at runtime
+    // Widget scripts — iCUE injects globals at runtime; disable no-undef
+    // since property names are declared per-widget in the HTML meta tags
     files: ["widgets/**/*.js"],
     languageOptions: {
       globals: {
@@ -38,19 +39,25 @@ export default [
         plugins: "readonly",
       },
     },
+    rules: {
+      // iCUE-injected property globals (e.g. proxyPort, accentColor) are
+      // declared in index.html meta tags, not statically knowable here
+      "no-undef": "off",
+    },
   },
   {
-    // Node.js globals for companion and scripts
+    // Node.js globals for companion and scripts (CommonJS)
     files: ["companion/**/*.js", "scripts/**/*.js"],
     languageOptions: {
+      sourceType: "commonjs",
       globals: {
         process: "readonly",
         __dirname: "readonly",
         __filename: "readonly",
         Buffer: "readonly",
         require: "readonly",
-        module: "readonly",
-        exports: "readonly",
+        module: "writable",
+        exports: "writable",
       },
     },
   },
