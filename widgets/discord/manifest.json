@@ -1,6 +1,7 @@
 {
   "author": "kyleian",
   "id": "com.kyleian.discord",
+  "title": "Discord Voice",
   "name": "Discord Voice",
   "description": "Shows your active Discord voice channel, server, connected members, and lets you mute/unmute with a tap.",
   "version": "1.0.0",

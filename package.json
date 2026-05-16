@@ -11,6 +11,7 @@
     "format": "prettier --write \"widgets/**/*.{js,css,html,json}\" \"companion/**/*.{js,json}\" \"*.{json,md}\"",
     "format:check": "prettier --check \"widgets/**/*.{js,css,html,json}\" \"companion/**/*.{js,json}\" \"*.{json,md}\"",
     "validate": "node scripts/validate.js",
+    "build": "node scripts/build.js",
     "test": "echo \"No root-level tests. Run 'npm test' inside companion/ for companion tests.\""
   },
   "devDependencies": {
