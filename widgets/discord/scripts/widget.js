@@ -14,7 +14,6 @@ const DEFAULT_PORT = 7575;
 const POLL_INTERVAL_MS = 2000;
 const REQUEST_TIMEOUT_MS = 1500;
 
-let pollTimer = null;
 let isMuted = false;
 
 /* ── DOM references ── */
@@ -160,7 +159,7 @@ async function fetchState() {
     } else {
       showScreen("disconnected");
     }
-  } catch (_err) {
+  } catch {
     clearTimeout(timeout);
     showScreen("error");
   }
@@ -180,7 +179,7 @@ async function toggleMute() {
       els.muteBtn.classList.toggle("is-muted", isMuted);
       els.muteLabel.textContent = isMuted ? "Unmute" : "Mute";
     }
-  } catch (_err) {
+  } catch {
     // Silently ignore — next poll will correct the UI
   }
 }
@@ -194,7 +193,7 @@ els.muteBtn.addEventListener("click", toggleMute);
 function startPolling() {
   applyTheme();
   fetchState();
-  pollTimer = setInterval(fetchState, POLL_INTERVAL_MS);
+  setInterval(fetchState, POLL_INTERVAL_MS);
 }
 
 // Register iCUE event handlers
