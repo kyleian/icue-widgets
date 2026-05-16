@@ -15,7 +15,6 @@ const POLL_INTERVAL_MS = 2000;
 const REQUEST_TIMEOUT_MS = 1500;
 
 let pollTimer = null;
-let currentState = null;
 let isMuted = false;
 
 /* ── DOM references ── */
@@ -154,7 +153,6 @@ async function fetchState() {
     }
 
     const data = await response.json();
-    currentState = data;
 
     if (data.in_voice) {
       renderConnected(data);
@@ -197,13 +195,6 @@ function startPolling() {
   applyTheme();
   fetchState();
   pollTimer = setInterval(fetchState, POLL_INTERVAL_MS);
-}
-
-function stopPolling() {
-  if (pollTimer) {
-    clearInterval(pollTimer);
-    pollTimer = null;
-  }
 }
 
 // Register iCUE event handlers
