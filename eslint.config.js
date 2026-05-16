@@ -46,8 +46,8 @@ export default [
     },
   },
   {
-    // Node.js globals for companion and scripts (CommonJS)
-    files: ["companion/**/*.js", "scripts/**/*.js"],
+    // Node.js globals for companion (CommonJS — uses require/module.exports)
+    files: ["companion/**/*.js"],
     languageOptions: {
       sourceType: "commonjs",
       globals: {
@@ -58,6 +58,18 @@ export default [
         require: "readonly",
         module: "writable",
         exports: "writable",
+      },
+    },
+  },
+  {
+    // Node.js globals for scripts (ESM — uses import/export)
+    files: ["scripts/**/*.js"],
+    languageOptions: {
+      globals: {
+        process: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+        Buffer: "readonly",
       },
     },
   },
