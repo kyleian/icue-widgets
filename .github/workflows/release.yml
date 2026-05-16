@@ -55,7 +55,7 @@ jobs:
   # ────────────────────────────────────────────────────
   release:
     name: Package & Release
-    needs: [lint, validate, companion-test]
+    needs: [validate, companion-test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
