@@ -1,0 +1,22 @@
+{
+  "name": "icue-widgets",
+  "version": "1.0.0",
+  "description": "Custom iCUE widgets for CORSAIR LCD devices",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint \"widgets/**/*.js\" \"companion/src/**/*.js\" \"companion/index.js\" \"scripts/**/*.js\"",
+    "lint:fix": "eslint --fix \"widgets/**/*.js\" \"companion/src/**/*.js\" \"companion/index.js\" \"scripts/**/*.js\"",
+    "lint:html": "htmlhint \"widgets/**/*.html\"",
+    "format": "prettier --write \"widgets/**/*.{js,css,html,json}\" \"companion/**/*.{js,json}\" \"*.{json,md}\"",
+    "format:check": "prettier --check \"widgets/**/*.{js,css,html,json}\" \"companion/**/*.{js,json}\" \"*.{json,md}\"",
+    "validate": "node scripts/validate.js",
+    "test": "echo \"No root-level tests. Run 'npm test' inside companion/ for companion tests.\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "htmlhint": "^1.1.4",
+    "prettier": "^3.0.0"
+  }
+}

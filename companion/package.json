@@ -1,0 +1,28 @@
+{
+  "name": "icue-widgets-companion",
+  "version": "1.0.0",
+  "description": "Companion server bridging Discord IPC to HTTP for iCUE widgets",
+  "private": true,
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "jest --forceExit",
+    "test:coverage": "jest --coverage --forceExit",
+    "lint": "eslint src/ index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "nodemon": "^3.0.0",
+    "supertest": "^6.3.4"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.js"]
+  }
+}

@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ────────────────────────────────────────────────────
+  # Lint & format check (root tooling + widget JS/HTML)
+  # ────────────────────────────────────────────────────
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install root devDependencies
+        run: npm ci
+
+      - name: ESLint (widget scripts)
+        run: npm run lint
+
+      - name: HTMLHint (widget HTML)
+        run: npm run lint:html
+
+      - name: Prettier format check
+        run: npm run format:check
+
+  # ────────────────────────────────────────────────────
+  # Validate widget manifests
+  # ────────────────────────────────────────────────────
+  validate:
+    name: Validate Widgets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install root devDependencies
+        run: npm ci
+
+      - name: Validate discord widget
+        run: npm run validate widgets/discord
+
+  # ────────────────────────────────────────────────────
+  # Companion server tests
+  # ────────────────────────────────────────────────────
+  companion-test:
+    name: Companion Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: companion
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: companion/package-lock.json
+
+      - name: Install companion dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: companion-coverage
+          path: companion/coverage/
+          retention-days: 14

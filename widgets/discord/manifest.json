@@ -1,0 +1,26 @@
+{
+  "author": "kyleian",
+  "id": "com.kyleian.discord",
+  "name": "Discord Voice",
+  "description": "Shows your active Discord voice channel, server, connected members, and lets you mute/unmute with a tap.",
+  "version": "1.0.0",
+  "preview_icon": "resources/icon.svg",
+  "min_framework_version": "1.0.0",
+  "os": [
+    {
+      "platform": "windows"
+    }
+  ],
+  "supported_devices": [
+    {
+      "type": "dashboard_lcd"
+    },
+    {
+      "type": "pump_lcd"
+    },
+    {
+      "type": "keyboard_lcd"
+    }
+  ],
+  "interactive": true
+}

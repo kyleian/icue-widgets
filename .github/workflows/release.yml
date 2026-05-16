@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  # ────────────────────────────────────────────────────
+  # Run CI checks before releasing
+  # ────────────────────────────────────────────────────
+  ci-gate:
+    name: CI Gate
+    uses: ./.github/workflows/ci.yml
+
+  # ────────────────────────────────────────────────────
+  # Package widgets and publish a GitHub Release
+  # ────────────────────────────────────────────────────
+  release:
+    name: Package & Release
+    needs: ci-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install iCUE Widget CLI
+        run: npm install -g @elgato/icuewidget-cli || echo "CLI not yet published — skipping packaging step"
+
+      - name: Package widgets
+        id: package
+        run: |
+          mkdir -p dist
+          for widget_dir in widgets/*/; do
+            widget_name=$(basename "$widget_dir")
+            echo "Packaging $widget_name…"
+            if command -v icuewidget &>/dev/null; then
+              icuewidget package "$widget_dir" --output dist/
+            else
+              echo "WARNING: icuewidget CLI not found. Zipping as fallback."
+              cd "$widget_dir" && zip -r "../../dist/${widget_name}.icuewidget" . && cd ../..
+            fi
+          done
+          ls -la dist/
+
+      - name: Extract release notes from tag
+        id: notes
+        run: |
+          TAG="${{ github.ref_name }}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Release ${{ steps.notes.outputs.tag }}"
+          body: |
+            ## iCUE Widgets — ${{ steps.notes.outputs.tag }}
+
+            ### Installation
+            1. Download the `.icuewidget` file(s) below
+            2. Open **iCUE → Widgets** and click the **+** button
+            3. Select the downloaded file
+
+            ### Included Widgets
+            - **Discord Voice** — Shows your active voice channel, members, and mute toggle
+          files: dist/*.icuewidget
+          fail_on_unmatched_files: false
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
