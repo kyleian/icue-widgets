@@ -12,16 +12,50 @@ jobs:
   # ────────────────────────────────────────────────────
   # Run CI checks before releasing
   # ────────────────────────────────────────────────────
-  ci-gate:
-    name: CI Gate
-    uses: ./.github/workflows/ci.yml
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run lint
+      - run: npm run lint:html
+      - run: npm run format:check
+
+  validate:
+    name: Validate Widgets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run validate widgets/discord
+
+  companion-test:
+    name: Companion Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: companion
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run test:coverage
 
   # ────────────────────────────────────────────────────
   # Package widgets and publish a GitHub Release
   # ────────────────────────────────────────────────────
   release:
     name: Package & Release
-    needs: ci-gate
+    needs: [lint, validate, companion-test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,7 +66,7 @@ jobs:
           node-version: 20
 
       - name: Install iCUE Widget CLI
-        run: npm install -g @elgato/icuewidget-cli || echo "CLI not yet published — skipping packaging step"
+        run: npm install -g @elgato/icuewidget-cli || echo "CLI not yet published — using zip fallback"
 
       - name: Package widgets
         id: package
@@ -44,24 +78,18 @@ jobs:
             if command -v icuewidget &>/dev/null; then
               icuewidget package "$widget_dir" --output dist/
             else
-              echo "WARNING: icuewidget CLI not found. Zipping as fallback."
-              cd "$widget_dir" && zip -r "../../dist/${widget_name}.icuewidget" . && cd ../..
+              echo "icuewidget CLI not found — zipping as fallback"
+              (cd "$widget_dir" && zip -r "../../dist/${widget_name}.icuewidget" .)
             fi
           done
           ls -la dist/
 
-      - name: Extract release notes from tag
-        id: notes
-        run: |
-          TAG="${{ github.ref_name }}"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "Release ${{ steps.notes.outputs.tag }}"
+          name: "Release ${{ github.ref_name }}"
           body: |
-            ## iCUE Widgets — ${{ steps.notes.outputs.tag }}
+            ## iCUE Widgets — ${{ github.ref_name }}
 
             ### Installation
             1. Download the `.icuewidget` file(s) below
