@@ -159,7 +159,7 @@ async function fetchState() {
     } else {
       showScreen("disconnected");
     }
-  } catch {
+  } catch (e) {
     clearTimeout(timeout);
     showScreen("error");
   }
@@ -179,7 +179,7 @@ async function toggleMute() {
       els.muteBtn.classList.toggle("is-muted", isMuted);
       els.muteLabel.textContent = isMuted ? "Unmute" : "Mute";
     }
-  } catch {
+  } catch (e) {
     // Silently ignore — next poll will correct the UI
   }
 }
@@ -197,7 +197,7 @@ function startPolling() {
 }
 
 // Register iCUE event handlers
-icueEvents = {
+var icueEvents = {
   onICUEInitialized: () => {
     applyTheme();
     startPolling();

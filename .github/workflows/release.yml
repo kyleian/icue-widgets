@@ -65,9 +65,6 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install iCUE Widget CLI
-        run: npm install -g @elgato/icuewidget-cli || echo "CLI not yet published — using zip fallback"
-
       - name: Package widgets
         id: package
         run: |
@@ -75,12 +72,7 @@ jobs:
           for widget_dir in widgets/*/; do
             widget_name=$(basename "$widget_dir")
             echo "Packaging $widget_name…"
-            if command -v icuewidget &>/dev/null; then
-              icuewidget package "$widget_dir" --output dist/
-            else
-              echo "icuewidget CLI not found — zipping as fallback"
-              (cd "$widget_dir" && zip -r "../../dist/${widget_name}.icuewidget" .)
-            fi
+            (cd "$widget_dir" && zip -r "../../dist/${widget_name}.icuewidget" .)
           done
           ls -la dist/
 

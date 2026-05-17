@@ -7,6 +7,7 @@
 import { readFileSync, existsSync } from "fs";
 import { join, resolve } from "path";
 
+
 const REQUIRED_MANIFEST_FIELDS = [
   "author",
   "id",
@@ -23,7 +24,7 @@ const VALID_DEVICE_TYPES = ["dashboard_lcd", "keyboard_lcd", "pump_lcd"];
 const VALID_PLATFORMS = ["windows"];
 const SEMVER_RE = /^\d+\.\d+\.\d+$/;
 const REVERSE_DNS_RE = /^[a-z0-9][a-z0-9\-.]*[a-z0-9]$/;
-const REQUIRED_FILES = ["index.html", "manifest.json"];
+const REQUIRED_FILES = ["index.html", "manifest.json", "translation.json"];
 
 function error(msg) {
   console.error(`  ✗ ${msg}`);
@@ -109,6 +110,28 @@ function validateWidget(widgetDir) {
     }
   }
 
+  // Validate index.html has a non-empty <title> tag (iCUE rejects without it)
+  const htmlPath = join(widgetDir, "index.html");
+  if (existsSync(htmlPath)) {
+    const html = readFileSync(htmlPath, "utf8");
+    const titleMatch = html.match(/<title>([^<]*)<\/title>/i);
+    if (!titleMatch) {
+      error(`index.html: missing <title> element — iCUE will reject the widget`);
+      valid = false;
+    } else if (titleMatch[1].trim() === "") {
+      error(`index.html: <title> is empty — iCUE will reject the widget`);
+      valid = false;
+    } else {
+      ok(`index.html: has <title>${titleMatch[1]}</title>`);
+    }
+    if (!html.startsWith("<!DOCTYPE html>") && !html.startsWith("<!doctype html>")) {
+      error(`index.html: must start with <!DOCTYPE html>`);
+      valid = false;
+    } else {
+      ok(`index.html: has DOCTYPE`);
+    }
+  }
+
   // Parse and validate manifest
   const manifestPath = join(widgetDir, "manifest.json");
   if (existsSync(manifestPath)) {
@@ -121,6 +144,29 @@ function validateWidget(widgetDir) {
     }
     const manifestValid = validateManifest(widgetDir, manifest);
     if (!manifestValid) valid = false;
+  }
+
+  // Validate translation.json structure: must have {"en":{"translation":{...}}}
+  const translationPath = join(widgetDir, "translation.json");
+  if (existsSync(translationPath)) {
+    let t;
+    try {
+      t = JSON.parse(readFileSync(translationPath, "utf8"));
+    } catch (err) {
+      error(`translation.json: invalid JSON — ${err.message}`);
+      valid = false;
+    }
+    if (t) {
+      if (!t.en || typeof t.en !== "object") {
+        error(`translation.json: missing top-level "en" key`);
+        valid = false;
+      } else if (!t.en.translation || typeof t.en.translation !== "object") {
+        error(`translation.json: "en" must contain a nested "translation" object — got {"en":{...}} but iCUE requires {"en":{"translation":{...}}}`);
+        valid = false;
+      } else {
+        ok(`translation.json: structure is correct (en.translation)`);
+      }
+    }
   }
 
   return valid;
